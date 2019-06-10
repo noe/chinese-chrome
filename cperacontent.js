@@ -282,7 +282,20 @@ var ppcContent = {
 	configPage: function() {
 		window.openDialog('chrome://cperapera/content/prefs.xul', '', 'chrome,centerscreen');
 	},
-	
+
+	remembered: [],
+
+	copyToClipboard : function (text) {
+		// from https://stackoverflow.com/a/18455088/674487
+		var copyFrom = document.createElement("textarea");
+		copyFrom.textContent = text;
+		document.body.appendChild(copyFrom);
+		copyFrom.select();
+		document.execCommand('copy');
+		copyFrom.blur();
+		document.body.removeChild(copyFrom);
+	},
+
 	keysDown: [],
 
 	onKeyDown: function(ev) { ppcContent._onKeyDown(ev) },
@@ -306,13 +319,23 @@ var ppcContent = {
 		case 27:	// esc
 			this.hidePopup();
 			break;
+		case 82:  // r
+			if (ppcContent.lastFound && ppcContent.lastFound.length > 0) {
+				var e = ppcContent.lastFound[0].data[0][0].match(/^(.+?)\s+(?:\[(.*?)\])?\s*\/(.+)\//);
+				hanzi = e[1].split(" ")[1];
+				this.remembered.push(hanzi);
+			}
+			break;
 		case 65:	// a
 			this.altView = (this.altView + 1) % 3;
 			this.show(ev.currentTarget.cperapera);
 			break;
-		//case 67:	// c
-//			this.copyToClip();
-			//break;
+		case 67:	// c
+			if (this.remembered.length > 0) {
+				this.copyToClipboard(this.remembered.join("\n"));
+				this.remembered = [];
+			}
+			break;
 		case 66:	// b
 			var ofs = ev.currentTarget.cperapera.uofs;
 			for (i = 50; i > 0; --i) {
@@ -326,6 +349,7 @@ var ppcContent = {
 		case 77:	// m
 			ev.currentTarget.cperapera.uofsNext = 1;
 		case 78:	// n
+			console.log("NOETE: n");
 			for (i = 50; i > 0; --i) {
 				ev.currentTarget.cperapera.uofs += ev.currentTarget.cperapera.uofsNext;
 				this.showMode = 0;
