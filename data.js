@@ -49,24 +49,31 @@ ppcDict.prototype = {
 		this.config = c;
 	},
 
-	fileRead: function(url, charset) {
-		var req = new XMLHttpRequest();
-		req.open("GET", url, false);
-		req.send(null);
-		return req.responseText;
-	},
-
-	fileReadArray: function(name, charset) {
-		var a = this.fileRead(name, charset).split('\n');
-		// Is this just in case there is blank shit in the file.  It was writtin by Jon though.
-		// I suppose this is more robust
-		while ((a.length > 0) && (a[a.length - 1].length == 0)) a.pop();
-		return a;
-	},
-
 	loadDictionary: function() {
 		this.wordDict = this.fileRead(chrome.extension.getURL("data/dict.dat"));
 		this.wordIndex = this.fileRead(chrome.extension.getURL("data/dict.idx"));
+		var _this = this;
+		var wordDictUrl = chrome.extension.getURL("data/dict.dat");
+		console.log(wordDictUrl);;
+		var req1 = new XMLHttpRequest();
+		req1.onload = function(){
+			console.log("hooray1");
+			_this.wordDict = this.responseText;
+			console.log(this.wordDict);
+		};
+		req1.open("GET", wordDictUrl);
+		req1.send();
+
+		var wordIndexUrl = chrome.extension.getURL("data/dict.idx");
+		console.log(wordIndexUrl);;
+		var req2 = new XMLHttpRequest();
+		req2.onload = function(){
+			console.log("hooray2");
+			_this.wordIndex = this.responseText;
+			console.log(this.wordIndex);
+		};
+		req2.open("GET", wordDictUrl);
+		req2.send();
 	},
 
 	getUniqueArray: function(arr) {
